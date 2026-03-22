@@ -913,9 +913,25 @@
   }
 
   /* ── ADD FILE ── */
+  function extractDriveId(url){
+    // formats:
+    // /file/d/ID/view  or  /file/d/ID
+    // /open?id=ID
+    // /uc?id=ID
+    var m;
+    m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if(m) return m[1];
+    m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if(m) return m[1];
+    m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if(m) return m[1];
+    return null;
+  }
+
   function convertDriveLink(url){
-    var m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if(m) return 'https://drive.google.com/uc?export=download&id='+m[1];
+    var id = extractDriveId(url);
+    // &confirm=t bypasses the "large file" virus scan warning page
+    if(id) return 'https://drive.google.com/uc?export=download&confirm=t&id='+id;
     return url;
   }
 
@@ -928,11 +944,16 @@
     if(!link||!link.includes('drive.google.com')){
       showToast('❌ Érvényes Google Drive link szükséges!');return;
     }
+    var id = extractDriveId(link);
+    if(!id){
+      showToast('❌ Nem sikerült azonosítani a fájlt. Ellenőrizd a linket!');return;
+    }
 
     files.unshift({
       id: Date.now(),
       name: name,
       link: convertDriveLink(link),
+      fileId: id,
       cat: cat,
       date: new Date().toLocaleDateString('hu-HU'),
     });
@@ -986,6 +1007,9 @@
 
     grid.innerHTML = filtered.map(function(f){
       var m = catMeta[f.cat]||catMeta.other;
+      var dlLink = f.fileId
+        ? 'https://drive.google.com/uc?export=download&confirm=t&id='+f.fileId
+        : f.link;
       return '<div class="file-card">'+
         '<div class="file-icon '+m.cls+'" style="background:'+m.bg+'">'+m.icon+'</div>'+
         '<div class="file-info">'+
@@ -996,7 +1020,7 @@
           '</div>'+
         '</div>'+
         '<div class="file-actions">'+
-          '<a class="btn-dl" href="'+escHtml(f.link)+'" target="_blank" onclick="recordDownload()">'+
+          '<a class="btn-dl" href="'+escHtml(dlLink)+'" target="_blank" download onclick="recordDownload()">'+
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'+
             'Letöltés'+
           '</a>'+

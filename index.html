@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DriveStore</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --bg:#08080e;
+      --surface:#0f0f1a;
+      --surface2:#151523;
+      --border:#1c1c2e;
+      --accent:#4fffb0;
+      --accent-dim:rgba(79,255,176,0.12);
+      --purple:#8b5cf6;
+      --text:#eeeef5;
+      --muted:#52526e;
+      --danger:#ff4f6b;
+    }
+
+    html{scroll-behavior:smooth}
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Syne',sans-serif;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    /* ── GRID BG ── */
+    .grid-bg{
+      position:fixed;inset:0;pointer-events:none;z-index:0;
+      background-image:
+        linear-gradient(rgba(79,255,176,0.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(79,255,176,0.025) 1px,transparent 1px);
+      background-size:48px 48px;
+    }
+
+    /* ── NAV ── */
+    nav{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      padding:0 48px;height:64px;
+      display:flex;align-items:center;justify-content:space-between;
+      background:rgba(8,8,14,0.7);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+
+    .nav-logo-icon{
+      width:32px;height:32px;
+      background:var(--accent);border-radius:7px;
+      display:grid;place-items:center;color:#000;
+    }
+    .nav-logo-icon svg{width:17px;height:17px}
+
+    .nav-logo-text{font-size:1.2rem;font-weight:800;letter-spacing:-0.5px;color:var(--text)}
+    .nav-logo-text span{color:var(--accent)}
+
+    .nav-links{display:flex;align-items:center;gap:8px}
+
+    .nav-link{
+      font-size:0.82rem;color:var(--muted);
+      text-decoration:none;padding:6px 14px;
+      border-radius:8px;cursor:pointer;
+      transition:color .2s,background .2s;
+      background:none;border:none;font-family:'Syne',sans-serif;
+    }
+    .nav-link:hover{color:var(--text);background:rgba(255,255,255,0.05)}
+    .nav-link.active{color:var(--accent)}
+
+    .nav-cta{
+      background:var(--accent);color:#000;
+      border:none;border-radius:8px;
+      padding:8px 18px;font-family:'Syne',sans-serif;
+      font-weight:700;font-size:0.82rem;cursor:pointer;
+      transition:transform .15s,box-shadow .2s;
+    }
+    .nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,255,176,.3)}
+
+    /* ── PAGES ── */
+    .page{display:none;min-height:100vh;padding-top:64px}
+    .page.active{display:block}
+
+    /* ══════════════════════════════
+       LANDING PAGE
+    ══════════════════════════════ */
+    #page-home{
+      display:none;
+      flex-direction:column;
+    }
+    #page-home.active{display:flex}
+
+    /* Hero section */
+    .hero{
+      position:relative;z-index:5;
+      display:flex;flex-direction:column;
+      align-items:center;text-align:center;
+      padding:100px 24px 80px;
+      overflow:hidden;
+    }
+
+    .hero-glow{
+      position:absolute;
+      top:-120px;left:50%;transform:translateX(-50%);
+      width:600px;height:600px;
+      background:radial-gradient(circle,rgba(79,255,176,0.08) 0%,transparent 70%);
+      pointer-events:none;
+    }
+
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:6px;
+      font-family:'Space Mono',monospace;
+      font-size:0.68rem;color:var(--accent);
+      border:1px solid rgba(79,255,176,0.25);
+      padding:5px 14px;border-radius:20px;
+      margin-bottom:28px;letter-spacing:1.5px;text-transform:uppercase;
+      animation:fadeDown .5s ease both;
+    }
+
+    .hero-badge .dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 6px var(--accent);
+      animation:pulse 2s ease infinite;
+    }
+
+    .hero h1{
+      font-size:clamp(3rem,7vw,6rem);
+      font-weight:800;line-height:1;
+      letter-spacing:-3px;
+      margin-bottom:24px;
+      animation:fadeDown .6s ease both .1s;
+    }
+
+    .hero h1 .line2{
+      display:block;
+      background:linear-gradient(90deg,var(--accent),#60efff,var(--purple));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+
+    .hero-sub{
+      color:var(--muted);font-size:1.1rem;
+      max-width:520px;line-height:1.75;
+      margin-bottom:44px;
+      animation:fadeDown .6s ease both .2s;
+    }
+
+    .hero-btns{
+      display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+      margin-bottom:72px;
+      animation:fadeDown .6s ease both .3s;
+    }
+
+    .btn-hero-primary{
+      background:var(--accent);color:#000;
+      border:none;border-radius:12px;
+      padding:14px 32px;
+      font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;
+      cursor:pointer;
+      display:flex;align-items:center;gap:8px;
+      transition:transform .15s,box-shadow .2s;
+    }
+    .btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(79,255,176,.3)}
+
+    .btn-hero-secondary{
+      background:transparent;color:var(--text);
+      border:1px solid var(--border);border-radius:12px;
+      padding:14px 32px;
+      font-family:'Syne',sans-serif;font-weight:600;font-size:1rem;
+      cursor:pointer;
+      transition:border-color .2s,background .2s;
+    }
+    .btn-hero-secondary:hover{border-color:rgba(79,255,176,.4);background:var(--accent-dim)}
+
+    /* Stats row */
+    .hero-stats{
+      display:flex;gap:0;
+      border:1px solid var(--border);
+      border-radius:16px;overflow:hidden;
+      animation:fadeDown .6s ease both .4s;
+    }
+
+    .hero-stat{
+      padding:20px 40px;text-align:center;
+      border-right:1px solid var(--border);
+      background:var(--surface);
+    }
+    .hero-stat:last-child{border-right:none}
+
+    .hero-stat-num{
+      font-family:'Space Mono',monospace;
+      font-size:1.8rem;font-weight:700;
+      color:var(--accent);
+      display:block;
+    }
+    .hero-stat-label{
+      font-size:0.72rem;color:var(--muted);
+      letter-spacing:1.5px;text-transform:uppercase;
+      margin-top:4px;display:block;
+    }
+
+    /* Features section */
+    .features{
+      position:relative;z-index:5;
+      padding:80px 48px;
+      max-width:1100px;margin:0 auto;
+    }
+
+    .section-label{
+      font-family:'Space Mono',monospace;
+      font-size:0.7rem;color:var(--accent);
+      letter-spacing:3px;text-transform:uppercase;
+      margin-bottom:16px;
+    }
+
+    .section-title{
+      font-size:clamp(1.8rem,3.5vw,2.8rem);
+      font-weight:800;letter-spacing:-1.5px;
+      margin-bottom:48px;line-height:1.1;
+    }
+
+    .features-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:20px;
+    }
+
+    .feature-card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:16px;padding:28px;
+      transition:border-color .2s,transform .2s;
+    }
+    .feature-card:hover{
+      border-color:rgba(79,255,176,.3);
+      transform:translateY(-4px);
+    }
+
+    .feature-icon{
+      width:44px;height:44px;
+      border-radius:10px;
+      display:grid;place-items:center;
+      font-size:1.3rem;
+      margin-bottom:18px;
+    }
+
+    .feature-card h3{
+      font-size:1rem;font-weight:700;
+      margin-bottom:10px;
+    }
+
+    .feature-card p{
+      font-size:0.87rem;color:var(--muted);
+      line-height:1.65;
+    }
+
+    /* How it works */
+    .how{
+      position:relative;z-index:5;
+      padding:80px 48px;
+      max-width:1100px;margin:0 auto;
+    }
+
+    .steps{
+      display:grid;grid-template-columns:repeat(3,1fr);
+      gap:0;margin-top:0;
+      border:1px solid var(--border);border-radius:20px;
+      overflow:hidden;
+    }
+
+    .step{
+      padding:36px 32px;
+      border-right:1px solid var(--border);
+      background:var(--surface);
+      position:relative;
+    }
+    .step:last-child{border-right:none}
+
+    .step-num{
+      font-family:'Space Mono',monospace;
+      font-size:3rem;font-weight:700;
+      color:var(--border);
+      display:block;margin-bottom:16px;
+      line-height:1;
+    }
+
+    .step h3{font-size:1rem;font-weight:700;margin-bottom:8px}
+    .step p{font-size:0.85rem;color:var(--muted);line-height:1.6}
+
+    /* CTA banner */
+    .cta-banner{
+      position:relative;z-index:5;
+      margin:40px 48px 80px;
+      background:linear-gradient(135deg,rgba(79,255,176,0.08),rgba(139,92,246,0.08));
+      border:1px solid rgba(79,255,176,0.2);
+      border-radius:24px;padding:60px;
+      text-align:center;overflow:hidden;
+    }
+
+    .cta-banner::before{
+      content:'';position:absolute;
+      top:-60px;right:-60px;
+      width:200px;height:200px;
+      background:radial-gradient(circle,rgba(79,255,176,0.15),transparent 70%);
+      pointer-events:none;
+    }
+
+    .cta-banner h2{
+      font-size:clamp(1.6rem,3vw,2.4rem);
+      font-weight:800;letter-spacing:-1px;
+      margin-bottom:12px;
+    }
+
+    .cta-banner p{color:var(--muted);font-size:1rem;margin-bottom:28px}
+
+    /* ══════════════════════════════
+       FILES PAGE
+    ══════════════════════════════ */
+    #page-files{position:relative}
+
+    .files-header{
+      position:relative;z-index:5;
+      padding:40px 48px 0;
+      display:flex;align-items:flex-end;justify-content:space-between;
+      flex-wrap:wrap;gap:16px;
+    }
+
+    .files-header h2{
+      font-size:2rem;font-weight:800;letter-spacing:-1px;
+    }
+
+    .files-header p{color:var(--muted);font-size:0.9rem;margin-top:4px}
+
+    .mini-stats{
+      display:flex;gap:16px;flex-wrap:wrap;
+    }
+
+    .mini-stat{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:10px;padding:10px 18px;
+      text-align:center;
+    }
+
+    .mini-stat-num{
+      font-family:'Space Mono',monospace;
+      font-size:1.2rem;font-weight:700;color:var(--accent);
+      display:block;
+    }
+
+    .mini-stat-label{
+      font-size:0.68rem;color:var(--muted);
+      letter-spacing:1px;text-transform:uppercase;
+      display:block;margin-top:2px;
+    }
+
+    .files-toolbar{
+      position:relative;z-index:5;
+      padding:24px 48px;
+      display:flex;gap:12px;
+    }
+
+    .search-wrap{flex:1;position:relative}
+
+    .search-icon{
+      position:absolute;left:14px;top:50%;
+      transform:translateY(-50%);
+      color:var(--muted);pointer-events:none;
+    }
+
+    input[type=text],input[type=url],select{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:10px;padding:11px 16px;
+      color:var(--text);
+      font-family:'Space Mono',monospace;
+      font-size:0.82rem;outline:none;
+      transition:border-color .2s,box-shadow .2s;
+      width:100%;
+    }
+
+    input[type=text]:focus,input[type=url]:focus,select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(79,255,176,.07);
+    }
+
+    input::placeholder{color:var(--muted)}
+    select option{background:var(--surface)}
+
+    #searchInput{padding-left:42px}
+
+    select.filter-sel{width:auto;min-width:150px}
+
+    .files-container{
+      position:relative;z-index:5;
+      padding:0 48px 120px;
+      display:grid;gap:12px;
+    }
+
+    /* File card */
+    .file-card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;padding:18px 22px;
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      align-items:center;gap:16px;
+      transition:border-color .2s,transform .2s,box-shadow .2s;
+      position:relative;overflow:hidden;
+    }
+
+    .file-card::after{
+      content:'';position:absolute;
+      left:0;top:0;bottom:0;width:3px;
+      background:var(--accent);
+      transform:scaleY(0);
+      transition:transform .2s;
+      border-radius:3px 0 0 3px;
+    }
+
+    .file-card:hover{
+      border-color:rgba(79,255,176,.25);
+      transform:translateX(4px);
+      box-shadow:0 4px 24px rgba(0,0,0,.35);
+    }
+
+    .file-card:hover::after{transform:scaleY(1)}
+
+    .file-icon{
+      width:46px;height:46px;border-radius:11px;
+      display:grid;place-items:center;
+      font-size:1.35rem;flex-shrink:0;
+    }
+
+    .file-info{min-width:0}
+
+    .file-name{
+      font-weight:700;font-size:0.93rem;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      margin-bottom:5px;
+    }
+
+    .file-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+    .file-date{
+      font-family:'Space Mono',monospace;
+      font-size:0.68rem;color:var(--muted);
+    }
+
+    .file-tag{
+      font-size:0.62rem;padding:2px 8px;border-radius:20px;
+      font-family:'Space Mono',monospace;
+      letter-spacing:.5px;text-transform:uppercase;
+    }
+
+    .file-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+
+    .btn-dl{
+      background:var(--accent);color:#000;
+      border:none;border-radius:8px;
+      padding:9px 16px;
+      font-family:'Syne',sans-serif;font-weight:700;font-size:0.8rem;
+      cursor:pointer;display:flex;align-items:center;gap:5px;
+      text-decoration:none;
+      transition:transform .15s,box-shadow .2s;
+    }
+    .btn-dl:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,255,176,.3)}
+    .btn-dl svg{width:13px;height:13px}
+
+    .btn-del{
+      background:transparent;border:1px solid var(--border);
+      border-radius:8px;padding:9px 10px;
+      color:var(--muted);cursor:pointer;
+      display:grid;place-items:center;
+      transition:border-color .2s,color .2s,background .2s;
+    }
+    .btn-del:hover{border-color:var(--danger);color:var(--danger);background:rgba(255,79,107,.08)}
+    .btn-del svg{width:13px;height:13px}
+
+    /* Empty */
+    .empty-state{
+      grid-column:1/-1;text-align:center;
+      padding:80px 24px;color:var(--muted);
+    }
+    .empty-icon{font-size:3.5rem;margin-bottom:16px;opacity:.35;display:block}
+    .empty-state h3{font-size:1.1rem;color:var(--text);margin-bottom:8px}
+    .empty-state p{font-size:0.88rem;line-height:1.6}
+
+    /* ── Category colors ── */
+    .cat-app    {background:rgba(139,92,246,.14);color:#a78bfa}
+    .cat-doc    {background:rgba(59,130,246,.14);color:#60a5fa}
+    .cat-media  {background:rgba(234,179,8,.14);color:#fbbf24}
+    .cat-archive{background:rgba(249,115,22,.14);color:#fb923c}
+    .cat-other  {background:rgba(107,114,128,.14);color:#9ca3af}
+
+    /* ══════════════════════════════
+       FAB BUTTON
+    ══════════════════════════════ */
+    .fab{
+      position:fixed;bottom:36px;right:36px;z-index:200;
+      width:60px;height:60px;
+      background:var(--accent);color:#000;
+      border:none;border-radius:50%;
+      display:grid;place-items:center;
+      cursor:pointer;
+      box-shadow:0 8px 32px rgba(79,255,176,.35);
+      transition:transform .2s,box-shadow .2s;
+    }
+    .fab:hover{transform:scale(1.1) rotate(90deg);box-shadow:0 12px 40px rgba(79,255,176,.5)}
+    .fab svg{width:26px;height:26px;transition:transform .2s}
+
+    /* ══════════════════════════════
+       MODAL
+    ══════════════════════════════ */
+    .modal-overlay{
+      position:fixed;inset:0;z-index:500;
+      background:rgba(8,8,14,.85);
+      backdrop-filter:blur(8px);
+      display:flex;align-items:center;justify-content:center;
+      padding:24px;
+      opacity:0;pointer-events:none;
+      transition:opacity .25s;
+    }
+
+    .modal-overlay.open{opacity:1;pointer-events:all}
+
+    .modal{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:20px;width:100%;max-width:500px;
+      padding:36px;
+      transform:translateY(24px) scale(.97);
+      transition:transform .25s;
+      position:relative;
+    }
+
+    .modal-overlay.open .modal{transform:translateY(0) scale(1)}
+
+    .modal-close{
+      position:absolute;top:18px;right:18px;
+      background:transparent;border:1px solid var(--border);
+      border-radius:8px;width:32px;height:32px;
+      display:grid;place-items:center;
+      color:var(--muted);cursor:pointer;
+      transition:border-color .2s,color .2s;
+    }
+    .modal-close:hover{border-color:var(--danger);color:var(--danger)}
+    .modal-close svg{width:14px;height:14px}
+
+    .modal-icon{
+      width:52px;height:52px;
+      background:var(--accent-dim);
+      border:1px solid rgba(79,255,176,.2);
+      border-radius:14px;
+      display:grid;place-items:center;
+      font-size:1.5rem;
+      margin-bottom:20px;
+    }
+
+    .modal h2{
+      font-size:1.4rem;font-weight:800;
+      letter-spacing:-.5px;margin-bottom:6px;
+    }
+
+    .modal-sub{color:var(--muted);font-size:0.87rem;margin-bottom:28px;line-height:1.5}
+
+    .modal-field{margin-bottom:16px}
+
+    .modal-field label{
+      display:block;font-size:0.75rem;
+      color:var(--muted);letter-spacing:.5px;
+      margin-bottom:6px;
+    }
+
+    .modal-submit{
+      width:100%;margin-top:8px;
+      background:var(--accent);color:#000;
+      border:none;border-radius:10px;
+      padding:14px;
+      font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;
+      cursor:pointer;
+      transition:transform .15s,box-shadow .2s;
+    }
+    .modal-submit:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,255,176,.3)}
+
+    /* ── TOAST ── */
+    #toast{
+      position:fixed;bottom:36px;left:50%;transform:translate(-50%,20px);
+      background:var(--surface2);
+      border:1px solid var(--border);
+      color:var(--text);
+      font-family:'Space Mono',monospace;font-size:0.78rem;
+      padding:12px 22px;border-radius:10px;
+      z-index:999;opacity:0;
+      transition:all .3s;pointer-events:none;
+      white-space:nowrap;
+    }
+    #toast.show{transform:translate(-50%,0);opacity:1}
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown{
+      from{opacity:0;transform:translateY(-18px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    @keyframes pulse{
+      0%,100%{opacity:1}50%{opacity:.4}
+    }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:900px){
+      .features-grid,.steps{grid-template-columns:1fr}
+      .step{border-right:none;border-bottom:1px solid var(--border)}
+      .step:last-child{border-bottom:none}
+      .hero-stats{flex-direction:column}
+      .hero-stat{border-right:none;border-bottom:1px solid var(--border)}
+      .hero-stat:last-child{border-bottom:none}
+    }
+
+    @media(max-width:640px){
+      nav{padding:0 20px}
+      .features,.how,.cta-banner{padding:48px 20px}
+      .files-header,.files-toolbar,.files-container{padding-left:20px;padding-right:20px}
+      .file-card{grid-template-columns:auto 1fr}
+      .file-actions{grid-column:1/-1;justify-content:flex-end}
+      .fab{bottom:24px;right:24px;width:52px;height:52px}
+      .fab svg{width:22px;height:22px}
+    }
+  </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+    </div>
+    <span class="nav-logo-text">Drive<span>Store</span></span>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link" onclick="showPage('home')">Kezdőlap</button>
+    <button class="nav-link" onclick="showPage('files')">Fájlok</button>
+    <button class="nav-cta" onclick="openModal()">+ Feltöltés</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════
+     LANDING PAGE
+══════════════════════════════ -->
+<div id="page-home" class="page active">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-badge"><span class="dot"></span> Google Drive alapú tárolás</div>
+    <h1>
+      Minden fájlod
+      <span class="line2">egy helyen.</span>
+    </h1>
+    <p class="hero-sub">
+      Adj hozzá Google Drive linkeket, rendszerezd kategóriák szerint, és töltsd le egyetlen kattintással. Gyors, egyszerű, szép.
+    </p>
+    <div class="hero-btns">
+      <button class="btn-hero-primary" onclick="openModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Fájl hozzáadása
+      </button>
+      <button class="btn-hero-secondary" onclick="showPage('files')">Fájlok böngészése →</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="hs-files">0</span>
+        <span class="hero-stat-label">Tárolt fájl</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="hs-cats">0</span>
+        <span class="hero-stat-label">Kategória</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="hs-dl">0</span>
+        <span class="hero-stat-label">Letöltés</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="section-label">// Funkciók</div>
+    <h2 class="section-title">Miért a DriveStore?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon cat-app">⚡</div>
+        <h3>Villámgyors</h3>
+        <p>Minden adat a böngésződben tárolódik. Nincs szerver, nincs bejelentkezés — azonnal indul.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon cat-doc">🔗</div>
+        <h3>Drive integráció</h3>
+        <p>Illeszd be a Google Drive megosztási linket, és automatikusan letöltési linkké alakítjuk.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon cat-media">📂</div>
+        <h3>Kategóriák</h3>
+        <p>Rendezd fájljaid alkalmazás, dokumentum, média vagy archívum kategóriába.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon cat-archive">🔍</div>
+        <h3>Gyors keresés</h3>
+        <p>Keress fájlnév vagy kategória szerint — az eredmény azonnal megjelenik.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon cat-other">📊</div>
+        <h3>Statisztikák</h3>
+        <p>Kövesd nyomon hány fájlod van és hányszor töltöttek le belőlük.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(79,255,176,0.12)">🔒</div>
+        <h3>Privát</h3>
+        <p>Az adatok csak a te böngésződben élnek. Semmit sem küldünk sehova.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how">
+    <div class="section-label">// Hogyan működik</div>
+    <h2 class="section-title">3 lépés az egész</h2>
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <h3>Másolj be egy linket</h3>
+        <p>Nyisd meg Google Drive-ban a fájlt, kattints a megosztásra, és másold be a linket a DriveStore-ba.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <h3>Add meg a nevét</h3>
+        <p>Nevezd el a fájlt és válassz kategóriát, hogy könnyen megtaláld később.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <h3>Töltsd le bármikor</h3>
+        <p>A fájlok megjelennek a listában. Egy kattintás és a letöltés elindul.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-banner">
+    <h2>Kezdj el most — ingyen</h2>
+    <p>Nincs regisztráció, nincs fizetés. Csak te és a fájljaid.</p>
+    <button class="btn-hero-primary" style="margin:0 auto;display:inline-flex" onclick="openModal()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Első fájl hozzáadása
+    </button>
+  </div>
+
+</div><!-- /page-home -->
+
+<!-- ══════════════════════════════
+     FILES PAGE
+══════════════════════════════ -->
+<div id="page-files" class="page">
+
+  <div class="files-header">
+    <div>
+      <h2>Fájlok</h2>
+      <p>Böngéssz, keress és töltsd le a tárolt fájljaid</p>
+    </div>
+    <div class="mini-stats">
+      <div class="mini-stat">
+        <span class="mini-stat-num" id="ms-files">0</span>
+        <span class="mini-stat-label">Fájl</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-num" id="ms-dl">0</span>
+        <span class="mini-stat-label">Letöltés</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="files-toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </span>
+      <input type="text" id="searchInput" placeholder="Keresés fájlnév alapján…" oninput="renderFiles()"/>
+    </div>
+    <select class="filter-sel" id="filterCat" onchange="renderFiles()">
+      <option value="all">Összes kategória</option>
+      <option value="app">📦 Alkalmazás</option>
+      <option value="doc">📄 Dokumentum</option>
+      <option value="media">🎬 Média</option>
+      <option value="archive">🗜️ Archívum</option>
+      <option value="other">📁 Egyéb</option>
+    </select>
+  </div>
+
+  <div class="files-container" id="filesGrid"></div>
+
+</div><!-- /page-files -->
+
+<!-- ══════════════════════════════
+     FAB
+══════════════════════════════ -->
+<button class="fab" onclick="openModal()" title="Fájl hozzáadása">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <line x1="12" y1="5" x2="12" y2="19"/>
+    <line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+</button>
+
+<!-- ══════════════════════════════
+     MODAL
+══════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="modal-icon">📎</div>
+    <h2>Új fájl hozzáadása</h2>
+    <p class="modal-sub">Illeszd be a Google Drive megosztási linket és adj nevet a fájlnak.</p>
+
+    <div class="modal-field">
+      <label>Fájlnév *</label>
+      <input type="text" id="m-name" placeholder="pl. GoreBox v13.apk"/>
+    </div>
+    <div class="modal-field">
+      <label>Google Drive link *</label>
+      <input type="url" id="m-link" placeholder="https://drive.google.com/file/d/…"/>
+    </div>
+    <div class="modal-field">
+      <label>Kategória</label>
+      <select id="m-cat">
+        <option value="app">📦 Alkalmazás</option>
+        <option value="doc">📄 Dokumentum</option>
+        <option value="media">🎬 Média</option>
+        <option value="archive">🗜️ Archívum</option>
+        <option value="other">📁 Egyéb</option>
+      </select>
+    </div>
+
+    <button class="modal-submit" onclick="addFile()">Hozzáadás →</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+  /* ── DATA ── */
+  var STORAGE_KEY = 'drivestore_files';
+  var COUNTER_KEY = 'drivestore_dl';
+
+  var catMeta = {
+    app:     {icon:'📦',label:'Alkalmazás',cls:'cat-app',   bg:'rgba(139,92,246,0.13)'},
+    doc:     {icon:'📄',label:'Dokumentum',cls:'cat-doc',   bg:'rgba(59,130,246,0.13)'},
+    media:   {icon:'🎬',label:'Média',     cls:'cat-media', bg:'rgba(234,179,8,0.13)'},
+    archive: {icon:'🗜️',label:'Archívum',  cls:'cat-archive',bg:'rgba(249,115,22,0.13)'},
+    other:   {icon:'📁',label:'Egyéb',     cls:'cat-other', bg:'rgba(107,114,128,0.13)'},
+  };
+
+  var files   = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  var dlCount = parseInt(localStorage.getItem(COUNTER_KEY)   || '0');
+
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(files));
+    localStorage.setItem(COUNTER_KEY, String(dlCount));
+  }
+
+  /* ── NAVIGATION ── */
+  function showPage(id){
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+    document.getElementById('page-'+id).classList.add('active');
+    if(id==='files') renderFiles();
+    updateStats();
+    window.scrollTo(0,0);
+  }
+
+  /* ── MODAL ── */
+  function openModal(){
+    document.getElementById('modalOverlay').classList.add('open');
+    setTimeout(function(){document.getElementById('m-name').focus()},200);
+  }
+
+  function closeModal(){
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+
+  function handleOverlayClick(e){
+    if(e.target===document.getElementById('modalOverlay')) closeModal();
+  }
+
+  /* ── ADD FILE ── */
+  function convertDriveLink(url){
+    var m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if(m) return 'https://drive.google.com/uc?export=download&id='+m[1];
+    return url;
+  }
+
+  function addFile(){
+    var name = document.getElementById('m-name').value.trim();
+    var link = document.getElementById('m-link').value.trim();
+    var cat  = document.getElementById('m-cat').value;
+
+    if(!name){showToast('❌ Add meg a fájlnevet!');return}
+    if(!link||!link.includes('drive.google.com')){
+      showToast('❌ Érvényes Google Drive link szükséges!');return;
+    }
+
+    files.unshift({
+      id: Date.now(),
+      name: name,
+      link: convertDriveLink(link),
+      cat: cat,
+      date: new Date().toLocaleDateString('hu-HU'),
+    });
+    save();
+    renderFiles();
+    updateStats();
+    closeModal();
+
+    document.getElementById('m-name').value = '';
+    document.getElementById('m-link').value = '';
+
+    showToast('✅ '+name+' hozzáadva!');
+  }
+
+  /* ── DELETE ── */
+  function deleteFile(id){
+    files = files.filter(function(f){return f.id!==id});
+    save();
+    renderFiles();
+    updateStats();
+    showToast('🗑️ Fájl törölve.');
+  }
+
+  /* ── DOWNLOAD ── */
+  function recordDownload(){
+    dlCount++;
+    save();
+    updateStats();
+  }
+
+  /* ── RENDER ── */
+  function renderFiles(){
+    var q   = (document.getElementById('searchInput')||{value:''}).value.toLowerCase();
+    var cat = (document.getElementById('filterCat')||{value:'all'}).value;
+    var grid = document.getElementById('filesGrid');
+    if(!grid) return;
+
+    var filtered = files.filter(function(f){
+      return f.name.toLowerCase().includes(q) && (cat==='all'||f.cat===cat);
+    });
+
+    if(!filtered.length){
+      grid.innerHTML =
+        '<div class="empty-state">'+
+          '<span class="empty-icon">📭</span>'+
+          '<h3>'+(files.length?'Nincs találat':'Még nincs fájl')+'</h3>'+
+          '<p>'+(files.length?'Próbálj más keresési feltételt.':'Kattints a + gombra és adj hozzá egy fájlt.')+'</p>'+
+        '</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(function(f){
+      var m = catMeta[f.cat]||catMeta.other;
+      return '<div class="file-card">'+
+        '<div class="file-icon '+m.cls+'" style="background:'+m.bg+'">'+m.icon+'</div>'+
+        '<div class="file-info">'+
+          '<div class="file-name">'+escHtml(f.name)+'</div>'+
+          '<div class="file-meta">'+
+            '<span class="file-date">📅 '+f.date+'</span>'+
+            '<span class="file-tag '+m.cls+'">'+m.label+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<div class="file-actions">'+
+          '<a class="btn-dl" href="'+escHtml(f.link)+'" target="_blank" onclick="recordDownload()">'+
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'+
+            'Letöltés'+
+          '</a>'+
+          '<button class="btn-del" onclick="deleteFile('+f.id+')" title="Törlés">'+
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>'+
+          '</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  /* ── STATS ── */
+  function updateStats(){
+    var n = files.length;
+    var cats = (new Set(files.map(function(f){return f.cat}))).size;
+
+    function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v}
+
+    set('hs-files',n); set('hs-cats',cats); set('hs-dl',dlCount);
+    set('ms-files',n); set('ms-dl',dlCount);
+  }
+
+  /* ── UTILS ── */
+  function escHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  var toastTimer;
+  function showToast(msg){
+    var t=document.getElementById('toast');
+    t.textContent=msg;t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(function(){t.classList.remove('show')},2600);
+  }
+
+  /* ── KEYBOARD ── */
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape') closeModal();
+    if(e.key==='Enter'&&(document.activeElement.id==='m-name'||document.activeElement.id==='m-link')) addFile();
+  });
+
+  /* ── INIT ── */
+  updateStats();
+  renderFiles();
+</script>
+</body>
+</html>
